@@ -172,6 +172,58 @@ def add_file_to_column_query(item_id, column_id):
     return query
 
 
+# WORKSPACE RESOURCE QUERIES
+def mutate_workspace_query(name, kind, description):
+
+    query = """
+    mutation {
+      create_workspace (name: %s, kind: %s, description: %s) {
+        id
+        description
+      }
+    }
+        
+    """ % (name, kind, description)
+
+    return query
+
+
+def add_user_to_workspace_query(workspace_id, user_ids, kind):
+    query = """
+        mutation {
+            add_users_to_workspace (workspace_id: %s, user_ids: %s, kind: %s) {
+                id
+            }
+        }
+    """ % (workspace_id, user_ids, kind)
+    return query
+
+
+def delete_user_to_workspace_query(workspace_id, user_ids):
+    query = """
+        mutation {
+            delete_users_from_workspace (workspace_id: %s, user_ids: %s) {
+                id
+            }
+        }
+    """ % (workspace_id, user_ids)
+    return query
+
+
+def get_workspaces_query(board_ids):
+    query = """
+        query{
+            boards(%s){
+                workspace{
+                    id
+                    description
+                }
+            }
+        }
+    """ % (f"ids:{board_ids}" if board_ids else "")
+    return query
+
+
 # UPDATE RESOURCE QUERIES
 def create_update_query(item_id, update_value):
     query = '''mutation
@@ -260,6 +312,18 @@ def get_tags_query(tags):
 
 
 # BOARD RESOURCE QUERIES
+def create_board_query(name, board_kind, **kwargs):
+    query = """
+    mutation{
+        create_board(board_name: %s, board_kind: %s, %s){
+            id
+        }
+    }
+    """ % (name, board_kind,
+           ",".join(f"{param}:{kwargs[param]}" for param in kwargs))
+    return query
+
+
 def get_board_items_query(board_id):
     query = '''query
     {
@@ -280,7 +344,7 @@ def get_board_items_query(board_id):
                 }
             }
         }
-    }''' % board_id
+    }''' % ([int(i) for i in board_id])
 
     return query
 
